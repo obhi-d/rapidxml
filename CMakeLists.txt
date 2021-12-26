@@ -7,6 +7,8 @@ project(rapidxml VERSION 1.13.0 LANGUAGES CXX)
 set(RAPIDXML_TARGET_NAME               ${PROJECT_NAME})
 set(RAPIDXML_INCLUDE_BUILD_DIR "${PROJECT_SOURCE_DIR}/include")
 
+include(GNUInstallDirs)
+
 ##
 ## TARGET
 ##
@@ -17,9 +19,18 @@ target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_17)
 target_include_directories(
     ${RAPIDXML_TARGET_NAME}
     INTERFACE $<BUILD_INTERFACE:${${PROJECT_NAME}_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}>
 )
 
+
+file(WRITE "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake.in"
+"
+@PACKAGE_INIT@
+
+include(\"\${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@Targets.cmake\")
+check_required_components(\"@PROJECT_NAME@\")
+"
+)
 
 ##
 ## INSTALL
@@ -35,4 +46,20 @@ write_basic_package_version_file("${PROJECT_NAME}ConfigVersion.cmake"
                                  VERSION ${PROJECT_VERSION}
                                  COMPATIBILITY SameMajorVersion)
 
-install(DIRECTORY include DESTINATION .)
+configure_package_config_file(
+    "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake.in"
+    "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
+    INSTALL_DESTINATION
+     cmake)
+
+
+install(EXPORT ${PROJECT_NAME}_Targets
+    FILE ${PROJECT_NAME}Targets.cmake
+    NAMESPACE ${PROJECT_NAME}::
+    DESTINATION cmake)
+
+install(FILES "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
+              "${PROJECT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
+              DESTINATION cmake)
+
+install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME})
