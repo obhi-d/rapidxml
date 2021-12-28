@@ -15,7 +15,6 @@ include(GNUInstallDirs)
 message("Target name: ${RAPIDXML_TARGET_NAME}")
 add_library(${RAPIDXML_TARGET_NAME} INTERFACE)
 add_library(${PROJECT_NAME}::${RAPIDXML_TARGET_NAME} ALIAS ${RAPIDXML_TARGET_NAME})
-target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_17)
 target_include_directories(
     ${RAPIDXML_TARGET_NAME}
     INTERFACE $<BUILD_INTERFACE:${${PROJECT_NAME}_SOURCE_DIR}/include>
